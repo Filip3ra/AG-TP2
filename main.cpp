@@ -1,10 +1,21 @@
 #include <iostream>
+#include "header.hpp"
 
 using namespace std;
 
-int main(){
+int main(int argc, char *argv[]) {
 
-  cout << "Hello, World!" << endl;
+    string filename = argv[1];
 
-  return 0;
+    vector<vector<int>> matrix = readFile(filename);
+    
+    cout << "Matriz lida do arquivo:" << endl;
+    for (const auto& row : matrix) {
+        for (int num : row) {
+            cout << num << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
 }
