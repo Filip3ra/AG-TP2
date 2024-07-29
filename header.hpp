@@ -5,4 +5,14 @@
 
 using namespace std;
 
-vector<vector<int>> readFile(const string& filename);
+class FileManager
+{
+public:
+  void readFile(const string &filename);
+  const vector<int> &getVector() const;
+  vector<int> getNeighbor(int);
+
+private:
+  vector<int> data;
+  vector<int> values;
+};

@@ -5,40 +5,71 @@
 
 using namespace std;
 
-vector<vector<int>> readFile(const string &filename)
+void FileManager::readFile(const string &filename)
 {
   ifstream file(filename);
-  vector<vector<int>> board;
 
   if (!file.is_open())
   {
     cerr << "Erro ao abrir o arquivo!" << endl;
-    return board;
+    return;
   }
 
   string line;
+  data.clear();
   while (getline(file, line))
   {
     istringstream iss(line);
-    vector<int> row;
     int num;
-    int count = 0;
-
     while (iss >> num)
     {
-      cout << num;
-      row.push_back(num);
-      count++;
-
-      if (count == 3) // Para ler apenas 3 valores por linha
-      {
-        board.push_back(row);
-        row.clear();
-        count = 0;
-      }
+      data.push_back(num);
     }
   }
 
   file.close();
-  return board;
+}
+
+vector<int> FileManager::getNeighbor(int pos)
+{
+  values.clear();
+  switch (pos)
+  {
+  case 0:
+    values = {1, 3};
+    break;
+  case 1:
+    values = {0, 2, 4};
+    break;
+  case 2:
+    values = {1, 5};
+    break;
+  case 3:
+    values = {0, 4, 6};
+    break;
+  case 4:
+    values = {1, 3, 5, 7};
+    break;
+  case 5:
+    values = {2, 4, 8};
+    break;
+  case 6:
+    values = {3, 7};
+    break;
+  case 7:
+    values = {6, 4, 8};
+    break;
+  case 8:
+    values = {5, 7};
+    break;
+  default:
+    cerr << "Posição inválida!" << endl;
+    break;
+  }
+  return values;
+}
+
+const vector<int> &FileManager::getVector() const
+{
+  return data;
 }
