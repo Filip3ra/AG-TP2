@@ -39,8 +39,7 @@ Node *a_star(const Node &start)
     // Verifica se chegou no resultado final
     if (current.board == goalState)
     {
-      // reconsctruir o caminho
-      // provavelmente passando a open_list como parâmetro
+      // implementar
       cout << "Encontrei" << endl;
       break;
     }
@@ -95,14 +94,11 @@ vector<Node> generateSuccessors(const Node parent)
   return successors;
 }
 
-// mostra os vizinhos válidos dada uma posição
-/*
+/* mostra os vizinhos válidos dada uma posição
 Goal state:
 0 1 2
 3 4 5
-6 7 8
-
- */
+6 7 8          */
 vector<int> getNeighbor(int pos)
 {
   vector<int> values;
