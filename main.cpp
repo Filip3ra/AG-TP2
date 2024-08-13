@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     vector<int> instancia = {5, 6, 2, 7, 1, 8, 3, 4, 0};
     Node node(instancia, 0, 0, 0);
-    node.a_star(node);
+    a_star(node);
     /*
         // Mostrando todos os vizinhos do block vazio
         vector<int> n;

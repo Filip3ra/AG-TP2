@@ -12,6 +12,7 @@ vector<int> goalState = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
 void calculateHeuristic(Node node)
 {
+
   int manhattanDistance = 0;
   for (int i = 0; i < node.board.size(); ++i)
   {
@@ -23,8 +24,9 @@ void calculateHeuristic(Node node)
   node.f_score = node.g_score + node.h_score;
 }
 
-Node *a_star(const Node &start)
+void a_star(const Node &start)
 {
+
   queue<Node> open_list;    // sequencia de estados até a solução final
   vector<Node> closed_list; // estados já visitados
 
@@ -52,16 +54,18 @@ Node *a_star(const Node &start)
 
     for (int i = 0; i < successors.size(); i++)
     {
-      auto it = find(closed_list[i].board.begin(), closed_list[i].board.end(), current.board);
-      if (it != closed_list[i].board.end())
-        continue; // se um sucessor já foi visitado, pula ele
-      open_list.push(successors[i]);
+      /* preciso comparar se um sucessor é um estado que já visitei */
+
+      if (true)                      // se encontrei um sucessor na lista de estados...
+        continue;                    // ...então ele já foi visitado, logo, pula ele
+      open_list.push(successors[i]); // caso contrário adiciona na outra lista
     }
   }
 }
 
 vector<Node> generateSuccessors(const Node parent)
 {
+
   vector<int> neighbors;
   int i;
 
@@ -76,6 +80,7 @@ vector<Node> generateSuccessors(const Node parent)
   }
 
   vector<Node> successors;
+
   for (int j = 0; j < neighbors.size(); j++)
   {
     vector<int> newBoard = parent.board;
