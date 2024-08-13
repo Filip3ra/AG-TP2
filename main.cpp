@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     FileManager fileManager;
     fileManager.readFile(filename);
 
+    // Printa o tabuleiro
     const vector<int> &data = fileManager.getVector();
     for (int i = 0; i < data.size(); ++i)
     {
@@ -26,15 +27,20 @@ int main(int argc, char *argv[])
     }
     cout << endl;
 
-    vector<int> n;
-    for (int x = 0; x < data.size(); x++)
-    {
-        cout << "Vizinhos do " << data[x] << ": " << endl;
-        n = fileManager.getNeighbor(x);
-        for (int j = 0; j < n.size(); j++)
-            cout << data[n[j]] << " ";
-        cout << endl;
-    }
+    vector<int> instancia = {5, 6, 2, 7, 1, 8, 3, 4, 0};
+    Node node(instancia, 0, 0, 0);
+    node.a_star(node);
+    /*
+        // Mostrando todos os vizinhos do block vazio
+        vector<int> n;
+        for (int x = 0; x < data.size(); x++)
+        {
+            cout << "Vizinhos do " << data[x] << ": " << endl;
+            n = fileManager.getNeighbor(x);
+            for (int j = 0; j < n.size(); j++)
+                cout << data[n[j]] << " ";
+            cout << endl;
+        }*/
 
     return 0;
 }
