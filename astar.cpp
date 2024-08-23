@@ -10,7 +10,11 @@ using namespace std;
 
 vector<int> goalState = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
-void calculateHeuristic(Node node)
+bool Node::operator<(const Node& rhs) const{
+  return this->f_score > rhs.f_score;
+}
+
+void calculateHeuristic(Node& node)
 {
 
   int manhattanDistance = 0;
@@ -24,10 +28,22 @@ void calculateHeuristic(Node node)
   node.f_score = node.g_score + node.h_score;
 }
 
-void a_star(const Node &start)
-{
+//  Reconstrói o caminho até a solução
+void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList) {
 
-  queue<Node> open_list;    // sequencia de estados até a solução final
+  Node auxNode = solved;
+  while (auxNode.parent != 0) {
+    stepsList.push_back(auxNode);
+    auxNode = closed_list[auxNode.parent];
+  }
+  stepsList.push_back(auxNode);
+  stepsList.push_back(closed_list[0]);
+  reverse(stepsList.begin(), stepsList.end());
+}
+
+void a_star(const Node& start)
+{
+  priority_queue<Node, vector<Node>> open_list;    // sequencia de estados até a solução final
   vector<Node> closed_list; // estados já visitados
 
   // insere instância incial
@@ -35,14 +51,29 @@ void a_star(const Node &start)
 
   while (!open_list.empty())
   {
-    auto current = open_list.front();
+    auto current = open_list.top();
     open_list.pop();
 
     // Verifica se chegou no resultado final
     if (current.board == goalState)
     {
-      // implementar
-      cout << "Encontrei" << endl;
+      vector<Node> stepsList;
+      makePath(current, closed_list, stepsList);
+      
+      // Printa os passos para chegar na solução
+      /*for (auto nodeAux : stepsList) {
+        for (int i = 0; i < nodeAux.board.size(); ++i)
+        {
+          int num = nodeAux.board[i];
+          cout << num << " ";
+          if ((i + 1) % 3 == 0)
+            cout << endl;
+        }
+        cout << nodeAux.g_score << " " << nodeAux.h_score << " ";
+        cout << endl << endl;
+      }*/
+      cout << "Numero de passos: " << stepsList.size() << endl;
+
       break;
     }
 
@@ -54,11 +85,18 @@ void a_star(const Node &start)
 
     for (int i = 0; i < successors.size(); i++)
     {
-      /* preciso comparar se um sucessor é um estado que já visitei */
-
-      if (true)                      // se encontrei um sucessor na lista de estados...
-        continue;                    // ...então ele já foi visitado, logo, pula ele
-      open_list.push(successors[i]); // caso contrário adiciona na outra lista
+      bool isPresent = false;
+      /* comparar se um sucessor é um estado que já visitei */
+      for (int j = 0; j < closed_list.size(); ++j) {                                                            // se encontrei um sucessor na lista de estados...
+        if (successors[i].board == closed_list[j].board) {
+          isPresent = true;
+          break;                                                                                             // ...então ele já foi visitado, logo, pula ele
+        }
+      }
+      if (!isPresent) {
+        successors[i].parent = closed_list.size() - 1;
+        open_list.push(successors[i]);                                                                        // caso contrário adiciona na outra lista
+      }
     }
   }
 }
@@ -88,12 +126,12 @@ vector<Node> generateSuccessors(const Node parent)
     // faz uma troca e gera um novo tabuleiro
     int aux = newBoard[neighbors[j]];
     newBoard[neighbors[j]] = 0;
-    newBoard[i] = neighbors[j];
+    newBoard[i] = aux;
 
     // gera um nó, calcula os valores g, h, f
-    Node node(newBoard, parent.g_score + 1, 0, 0);
+    Node node(newBoard, parent.g_score + 1, 0, 0, 0);
     calculateHeuristic(node);
-    successors[j] = node;
+    successors.push_back(node);
   }
 
   return successors;

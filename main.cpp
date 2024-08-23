@@ -18,17 +18,17 @@ int main(int argc, char *argv[])
 
     // Printa o tabuleiro
     const vector<int> &data = fileManager.getVector();
-    for (int i = 0; i < data.size(); ++i)
+    /*for (int i = 0; i < data.size(); ++i)
     {
         int num = data[i];
         cout << num << " ";
         if ((i + 1) % 3 == 0)
             cout << endl;
     }
-    cout << endl;
+    cout << endl;*/
 
-    vector<int> instancia = {5, 6, 2, 7, 1, 8, 3, 4, 0};
-    Node node(instancia, 0, 0, 0);
+    //vector<int> instancia = {1,4,2,0,3,5,6,7,8};
+    Node node(data, 0, 0, 0, 0);
     a_star(node);
     /*
         // Mostrando todos os vizinhos do block vazio
