@@ -9,10 +9,10 @@ class FileManager
 {
 public:
   void readFile(const string &filename);
-  const vector<int> &getVector() const;
+  const vector<vector<int>> &getVector() const;
 
 private:
-  vector<int> data;
+  vector<vector<int>> data;
   vector<int> values;
 };
 

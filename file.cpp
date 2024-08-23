@@ -19,18 +19,20 @@ void FileManager::readFile(const string &filename)
   data.clear();
   while (getline(file, line))
   {
+    vector<int> auxVec;
     istringstream iss(line);
     int num;
     while (iss >> num)
     {
-      data.push_back(num);
+      auxVec.push_back(num);
     }
+    data.push_back(auxVec);
   }
 
   file.close();
 }
 
-const vector<int> &FileManager::getVector() const
+const vector<vector<int>> &FileManager::getVector() const
 {
   return data;
 }

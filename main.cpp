@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     fileManager.readFile(filename);
 
     // Printa o tabuleiro
-    const vector<int> &data = fileManager.getVector();
+    const vector<vector<int>> &data = fileManager.getVector();
     /*for (int i = 0; i < data.size(); ++i)
     {
         int num = data[i];
@@ -28,8 +28,11 @@ int main(int argc, char *argv[])
     cout << endl;*/
 
     //vector<int> instancia = {1,4,2,0,3,5,6,7,8};
-    Node node(data, 0, 0, 0, 0);
-    a_star(node);
+    for(unsigned i=0; i<data.size(); ++i)
+    {
+      Node node(data[i], 0, 0, 0, 0);
+      a_star(node);
+    }
     /*
         // Mostrando todos os vizinhos do block vazio
         vector<int> n;
