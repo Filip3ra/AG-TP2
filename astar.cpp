@@ -5,6 +5,7 @@
 #include <queue>
 #include <list>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 
@@ -14,10 +15,8 @@ bool Node::operator<(const Node& rhs) const{
   return this->f_score > rhs.f_score;
 }
 
-void calculateHeuristic(Node& node)
+void calculateHeuristicNWrongs(Node& node)
 {
-
-  int manhattanDistance = 0;
   for (int i = 0; i < node.board.size(); ++i)
   {
     if (node.board[i] != goalState[i])
@@ -28,8 +27,49 @@ void calculateHeuristic(Node& node)
   node.f_score = node.g_score + node.h_score;
 }
 
+unsigned mod(int a) {
+  return a >= 0 ? a : a * -1;
+}
+
+void calculateHeuristicManhattan(Node& node)
+{
+  vector<vector<unsigned >> positionToCoord = { {2,0}, {2,1}, {2,2}, {1,0}, {1,1} , {1,2} , {0,0} , {0,1} , {0,2} };
+  int manhattanDistance = 0;
+  for (unsigned i=0; i < node.board.size(); ++i) {
+    for (unsigned j=0; j < node.board.size(); ++j) {
+      if (node.board[j] == i) {
+        manhattanDistance += mod(positionToCoord[j][0] - positionToCoord[i][0]) + mod(positionToCoord[j][1] - positionToCoord[i][1]);
+        break;
+      }
+    }
+  }
+  node.h_score = manhattanDistance;
+  node.f_score = node.g_score + node.h_score;
+}
+
+double euclidianDistance(vector<unsigned>& p1, vector<unsigned>& p2) {
+  return sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]));
+}
+
+void calculateHeuristicEuclidian(Node& node)
+{
+  vector<vector<unsigned >> positionToCoord = { {2,0}, {2,1}, {2,2}, {1,0}, {1,1} , {1,2} , {0,0} , {0,1} , {0,2} };
+  double manhattanDistance = 0;
+  for (unsigned i = 0; i < node.board.size(); ++i) {
+    for (unsigned j = 0; j < node.board.size(); ++j) {
+      if (node.board[j] == i) {
+        manhattanDistance += euclidianDistance(positionToCoord[i], positionToCoord[j]);
+        break;
+      }
+    }
+  }
+  node.h_score = manhattanDistance;
+  node.f_score = node.g_score + node.h_score;
+}
+
 //  Reconstrói o caminho até a solução
-void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList) {
+void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList)
+{
 
   Node auxNode = solved;
   while (auxNode.parent != 0) {
@@ -87,13 +127,21 @@ void a_star(const Node& start)
     {
       bool isPresent = false;
       /* comparar se um sucessor é um estado que já visitei */
-      for (int j = 0; j < closed_list.size(); ++j) {                                                            // se encontrei um sucessor na lista de estados...
-        if (successors[i].board == closed_list[j].board) {
+      for (int j = 0; j < closed_list.size(); ++j)
+      {                                                            // se encontrei um sucessor na lista de estados...
+        if (successors[i].board == closed_list[j].board)
+        {
+          if (successors[i].g_score < closed_list[j].g_score) {
+            closed_list[j].g_score = successors[i].g_score;
+            closed_list[j].parent = successors[i].parent;
+            closed_list[i].f_score = successors[i].f_score;
+          }
           isPresent = true;
           break;                                                                                             // ...então ele já foi visitado, logo, pula ele
         }
       }
-      if (!isPresent) {
+      if (!isPresent) 
+      {
         successors[i].parent = closed_list.size() - 1;
         open_list.push(successors[i]);                                                                        // caso contrário adiciona na outra lista
       }
@@ -130,7 +178,7 @@ vector<Node> generateSuccessors(const Node parent)
 
     // gera um nó, calcula os valores g, h, f
     Node node(newBoard, parent.g_score + 1, 0, 0, 0);
-    calculateHeuristic(node);
+    calculateHeuristicManhattan(node);
     successors.push_back(node);
   }
 
@@ -141,7 +189,7 @@ vector<Node> generateSuccessors(const Node parent)
 Goal state:
 0 1 2
 3 4 5
-6 7 8          */
+6 7 8           */
 vector<int> getNeighbor(int pos)
 {
   vector<int> values;

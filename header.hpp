@@ -21,8 +21,8 @@ class Node
 public:
   vector<int> board;
   int g_score; // nível da árvore
-  int h_score; // quantidade de blocos fora do lugar
-  int f_score; // soma de g + h
+  double h_score; // quantidade de blocos fora do lugar
+  double f_score; // soma de g + h
   int parent; //  antecessor do Node
 
   // Construtor para inicializar os valores
