@@ -5,10 +5,19 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+    string searchType;
+
     if (argc < 2)
     {
         cerr << "Por favor, forneça o nome do arquivo como argumento." << endl;
         return 1;
+    }
+    else if(argc < 3) {
+        searchType = "aStar"; 
+    }
+    else {
+
+        searchType = argv[2];
     }
 
     string filename = argv[1];
@@ -26,12 +35,21 @@ int main(int argc, char *argv[])
             cout << endl;
     }
     cout << endl;*/
-
+    
+    cout << "passos tempo" << endl;
     //vector<int> instancia = {1,4,2,0,3,5,6,7,8};
     for(unsigned i=0; i<data.size(); ++i)
     {
       Node node(data[i], 0, 0, 0, 0);
-      a_star(node);
+      if (!searchType.compare("idaStar")) {
+        ida_star(node);
+      }
+      else if(!searchType.compare("aStar")) {
+        a_star(node);
+      }
+      else {
+        cerr << "Selecione um método de pesquisa válido." << endl;
+      }
     }
     /*
         // Mostrando todos os vizinhos do block vazio

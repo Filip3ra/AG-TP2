@@ -34,6 +34,7 @@ public:
 };
 
 void a_star(const Node &);
-vector<Node> generateSuccessors(const Node);
+vector<Node> generateSuccessors(const Node, const unsigned parentIndex);
 vector<int> getNeighbor(int);
 void calculateHeuristic(Node&);
+void ida_star(Node& start);

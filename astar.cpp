@@ -6,10 +6,13 @@
 #include <list>
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
+using namespace chrono;
 
-vector<int> goalState = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+vector<int> goalState;
+vector<vector<int>> positionToCoord;
 
 bool Node::operator<(const Node& rhs) const{
   return this->f_score > rhs.f_score;
@@ -27,18 +30,14 @@ void calculateHeuristicNWrongs(Node& node)
   node.f_score = node.g_score + node.h_score;
 }
 
-unsigned mod(int a) {
-  return a >= 0 ? a : a * -1;
-}
-
 void calculateHeuristicManhattan(Node& node)
 {
-  vector<vector<unsigned >> positionToCoord = { {2,0}, {2,1}, {2,2}, {1,0}, {1,1} , {1,2} , {0,0} , {0,1} , {0,2} };
+  
   int manhattanDistance = 0;
   for (unsigned i=0; i < node.board.size(); ++i) {
     for (unsigned j=0; j < node.board.size(); ++j) {
       if (node.board[j] == i) {
-        manhattanDistance += mod(positionToCoord[j][0] - positionToCoord[i][0]) + mod(positionToCoord[j][1] - positionToCoord[i][1]);
+        manhattanDistance += abs(positionToCoord[j][0] - positionToCoord[i][0]) + abs(positionToCoord[j][1] - positionToCoord[i][1]);
         break;
       }
     }
@@ -47,13 +46,12 @@ void calculateHeuristicManhattan(Node& node)
   node.f_score = node.g_score + node.h_score;
 }
 
-double euclidianDistance(vector<unsigned>& p1, vector<unsigned>& p2) {
+double euclidianDistance(vector<int>& p1, vector<int>& p2) {
   return sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]));
 }
 
 void calculateHeuristicEuclidian(Node& node)
 {
-  vector<vector<unsigned >> positionToCoord = { {2,0}, {2,1}, {2,2}, {1,0}, {1,1} , {1,2} , {0,0} , {0,1} , {0,2} };
   double manhattanDistance = 0;
   for (unsigned i = 0; i < node.board.size(); ++i) {
     for (unsigned j = 0; j < node.board.size(); ++j) {
@@ -70,7 +68,6 @@ void calculateHeuristicEuclidian(Node& node)
 //  Reconstrói o caminho até a solução
 void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList)
 {
-
   Node auxNode = solved;
   while (auxNode.parent != 0) {
     stepsList.push_back(auxNode);
@@ -86,9 +83,23 @@ void a_star(const Node& start)
   priority_queue<Node, vector<Node>> open_list;    // sequencia de estados até a solução final
   vector<Node> closed_list; // estados já visitados
 
+  goalState.clear();
+  positionToCoord.clear();
+  for (unsigned i = 0; i < start.board.size(); ++i) {
+    goalState.push_back(i);
+  }
+
+  for (int i = sqrt(goalState.size())-1; i >= 0; --i) {
+    for (int j = 0; j < sqrt(goalState.size()); ++j) {
+      positionToCoord.push_back({ j, i });
+    }
+  }
+
+  high_resolution_clock::time_point tpStart = high_resolution_clock::now();
+
   // insere instância incial
   open_list.push(start);
-
+  unsigned iterCount = 0;
   while (!open_list.empty())
   {
     auto current = open_list.top();
@@ -97,6 +108,7 @@ void a_star(const Node& start)
     // Verifica se chegou no resultado final
     if (current.board == goalState)
     {
+      unsigned timeSpent = duration_cast<milliseconds>(high_resolution_clock::now() - tpStart).count();
       vector<Node> stepsList;
       makePath(current, closed_list, stepsList);
       
@@ -112,7 +124,7 @@ void a_star(const Node& start)
         cout << nodeAux.g_score << " " << nodeAux.h_score << " ";
         cout << endl << endl;
       }*/
-      cout << "Numero de passos: " << stepsList.size() << endl;
+      cout << stepsList.size()-1 << " " << timeSpent << endl;
 
       break;
     }
@@ -121,7 +133,7 @@ void a_star(const Node& start)
     closed_list.push_back(current);
 
     // Gera lista de sucessores
-    vector<Node> successors = generateSuccessors(current);
+    vector<Node> successors = generateSuccessors(current, closed_list.size() - 1);
 
     for (int i = 0; i < successors.size(); i++)
     {
@@ -142,16 +154,92 @@ void a_star(const Node& start)
       }
       if (!isPresent) 
       {
-        successors[i].parent = closed_list.size() - 1;
         open_list.push(successors[i]);                                                                        // caso contrário adiciona na outra lista
       }
     }
+    ++iterCount;
   }
 }
 
-vector<Node> generateSuccessors(const Node parent)
-{
+unsigned countIterIda = 0;
 
+int search(vector<Node>& path, double lowerBound) {
+  ++countIterIda;
+  unsigned lastNode = path.size() - 1;
+  if (path[lastNode].f_score > lowerBound) return path[lastNode].f_score;
+  if (path[lastNode].board == goalState) return -1;
+  int min = INT32_MAX;
+  vector<Node> successorsVec = generateSuccessors(path[lastNode], path.size()-1);
+  priority_queue<Node> successors(successorsVec.begin(), successorsVec.end());
+  unsigned nSuccessors = successors.size();
+  for (unsigned i = 0; i < nSuccessors; ++i) {
+    Node successor = successors.top();
+    successors.pop();
+    bool isInPath = false;
+    for (auto nodeAux : path) {
+      if (nodeAux.board == successor.board) {
+        isInPath = true;
+        break;
+      }
+    }
+    if (!isInPath) {
+      path.push_back(successor);
+      int result = search(path, lowerBound);
+      if (result == -1) return -1;
+      if (result < min) min = result;
+      path.pop_back();
+    }
+  }
+  return min;
+}
+
+void ida_star(Node& start) {
+
+  goalState.clear();
+  positionToCoord.clear();
+
+  for (unsigned i = 0; i < start.board.size(); ++i) {
+    goalState.push_back(i);
+  }
+
+  for (int i = sqrt(goalState.size()) - 1; i >= 0; --i) {
+    for (int j = 0; j < sqrt(goalState.size()); ++j) {
+      positionToCoord.push_back({ j, i });
+    }
+  }
+
+  high_resolution_clock::time_point tpStart = high_resolution_clock::now();
+
+  calculateHeuristicManhattan(start);
+  double lowerBound = start.h_score;
+  vector<Node> path;
+  path.push_back(start);
+  while (true) {
+    int result = search(path, lowerBound);
+    if (result == -1) {
+      unsigned timeSpent = duration_cast<milliseconds>(high_resolution_clock::now() - tpStart).count();
+      // printa o passo a passo da solução
+      /*for (auto nodeAux : path) {
+        for (int i = 0; i < nodeAux.board.size(); ++i)
+        {
+          int num = nodeAux.board[i];
+          printf("%02d ", num);
+          if ((i + 1) % (int)(sqrt(start.board.size())) == 0)
+            cout << endl;
+        }
+        cout << nodeAux.g_score << " " << nodeAux.h_score << " ";
+        cout << endl << endl;
+      }*/
+      cout << path.size() - 1 << " " << timeSpent << " " << countIterIda << endl;
+      return;
+    }
+    if (result == UINT32_MAX) return;
+    lowerBound = result;
+  }
+}
+
+vector<Node> generateSuccessors(const Node parent, const unsigned parentIndex)
+{
   vector<int> neighbors;
   int i;
 
@@ -177,7 +265,7 @@ vector<Node> generateSuccessors(const Node parent)
     newBoard[i] = aux;
 
     // gera um nó, calcula os valores g, h, f
-    Node node(newBoard, parent.g_score + 1, 0, 0, 0);
+    Node node(newBoard, parent.g_score + 1, 0, 0, parentIndex);
     calculateHeuristicManhattan(node);
     successors.push_back(node);
   }
@@ -185,46 +273,25 @@ vector<Node> generateSuccessors(const Node parent)
   return successors;
 }
 
-/* mostra os vizinhos válidos dada uma posição
-Goal state:
-0 1 2
-3 4 5
-6 7 8           */
+/* mostra os vizinhos válidos dada uma posição*/
 vector<int> getNeighbor(int pos)
 {
   vector<int> values;
-  switch (pos)
-  {
-  case 0:
-    values = {1, 3};
-    break;
-  case 1:
-    values = {0, 2, 4};
-    break;
-  case 2:
-    values = {1, 5};
-    break;
-  case 3:
-    values = {0, 4, 6};
-    break;
-  case 4:
-    values = {1, 3, 5, 7};
-    break;
-  case 5:
-    values = {2, 4, 8};
-    break;
-  case 6:
-    values = {3, 7};
-    break;
-  case 7:
-    values = {6, 4, 8};
-    break;
-  case 8:
-    values = {5, 7};
-    break;
-  default:
-    cerr << "Posição inválida!" << endl;
-    break;
+  int size = goalState.size();
+  int side = sqrt(size);
+
+  if (pos < (size-side)) {
+    values.push_back(pos + side);
   }
+  if (pos > (side-1)) {
+    values.push_back(pos - side);
+  }
+  if ((pos % side)) {
+    values.push_back(pos - 1);
+  }
+  if (abs(pos - (side - 1)) % side) {
+    values.push_back(pos + 1);
+  }
+
   return values;
 }
