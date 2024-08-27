@@ -25,19 +25,9 @@ int main(int argc, char *argv[])
     FileManager fileManager;
     fileManager.readFile(filename);
 
-    // Printa o tabuleiro
     const vector<vector<int>> &data = fileManager.getVector();
-    /*for (int i = 0; i < data.size(); ++i)
-    {
-        int num = data[i];
-        cout << num << " ";
-        if ((i + 1) % 3 == 0)
-            cout << endl;
-    }
-    cout << endl;*/
     
     cout << "passos tempo" << endl;
-    //vector<int> instancia = {1,4,2,0,3,5,6,7,8};
     for(unsigned i=0; i<data.size(); ++i)
     {
       Node node(data[i], 0, 0, 0, 0);
@@ -51,17 +41,6 @@ int main(int argc, char *argv[])
         cerr << "Selecione um método de pesquisa válido." << endl;
       }
     }
-    /*
-        // Mostrando todos os vizinhos do block vazio
-        vector<int> n;
-        for (int x = 0; x < data.size(); x++)
-        {
-            cout << "Vizinhos do " << data[x] << ": " << endl;
-            n = fileManager.getNeighbor(x);
-            for (int j = 0; j < n.size(); j++)
-                cout << data[n[j]] << " ";
-            cout << endl;
-        }*/
 
     return 0;
 }
