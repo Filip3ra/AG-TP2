@@ -32,7 +32,7 @@ public:
   bool operator<(const Node& rhs) const;
 };
 
-void a_star(const Node &, const bool printSteps);
+void a_star(Node &, const bool printSteps);
 vector<Node> generateSuccessors(const Node, const unsigned parentIndex);
 vector<int> getNeighbor(int);
 void ida_star(Node& start, const bool printSteps);

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        cout << "Use help para informações de como usar o programa." << endl;
+        cout << "\nUse help para informações de como usar o programa.\n\n";
         return 1;
     }
 
@@ -18,10 +18,10 @@ int main(int argc, char *argv[])
 
 
     if (!paramAux.compare("help") || !paramAux.compare("-help") || !paramAux.compare("--help")) {
-      cout << "./program [INSTPATH] [SEARCHOPTION] [PRINTSTEPS] \n\n";
+      cout << "\n./program [INSTPATH] [SEARCHOPTION] [PRINTSTEPS] \n\n";
       cout << "INSTPATH - Caminho para a instância.\n";
       cout << "SEARCHOPTION - use idaSearch ou aSearch. Usa aSearch como padrão\n";
-      cout << "PRINTSTEPS - defina como print ou dontPrint para imprimir todos os passos da solução. Usa dontPrint como padrão.\n";
+      cout << "PRINTSTEPS - defina como print ou dontPrint para imprimir todos os passos da solução. Usa dontPrint como padrão.\n\n";
       return 1;
     }
     if(argc  >= 2) {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     if(argc >= 3){
       paramAux = argv[2];
       if (paramAux.compare("aSearch") && paramAux.compare("idaSearch")) {
-        cout << "Insira um tipo de busca válida. Use help para informações de como usar o programa.\n";
+        cout << "\nInsira um tipo de busca válida. Use help para informações de como usar o programa.\n\n";
         return 1;
       }
       searchType = paramAux;
@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
     if (argc >= 4) {
       paramAux = argv[3];
       if (paramAux.compare("print") && paramAux.compare("dontPrint")) {
-        cout << "Insira um tipo de exibição do resultado válido. Use help para informações de como usar o programa.\n";
+        cout << "\nInsira um tipo de exibição do resultado válido. Use help para informações de como usar o programa.\n\n";
         return 1;
       }
       printSteps = !paramAux.compare("print");
     }
     if(argc >= 5){
-      cout << "Insira número válido de parâmetros. Use help para informações de como usar o programa.\n";
+      cout << "\nInsira número válido de parâmetros. Use help para informações de como usar o programa.\n\n";
       return 1;
     }
 

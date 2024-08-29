@@ -13,7 +13,6 @@ using namespace std;
 using namespace chrono;
 
 vector<int> goalState;
-vector<vector<int>> positionToCoord;
 
 bool Node::operator<(const Node& rhs) const{
   return this->f_score > rhs.f_score;
@@ -21,28 +20,28 @@ bool Node::operator<(const Node& rhs) const{
 
 void calculateHeuristicLCMD(Node& node) {
   vector<int> board = node.board;
-  unsigned sideSize = sqrt(board.size());
+  int sideSize = sqrt(board.size());
 
   int linearConflict = 0;
   int manhattanDistance = 0;
 
-  for (unsigned row = 0; row < sideSize; ++row) {
-    for (unsigned col = 0; col < sideSize; ++col) {
-      unsigned leftTile = row * sideSize + col;
+  for (int row = 0; row < sideSize; ++row) {
+    for (int col = 0; col < sideSize; ++col) {
+      int leftTile = row * sideSize + col;
 
       if (!board[leftTile]) {
         continue;
       }
 
-      for (unsigned colAux = col + 1; colAux < sideSize; ++colAux) {
-        unsigned rightTile = row * sideSize + colAux;
+      for (int colAux = col + 1; colAux < sideSize; ++colAux) {
+        int rightTile = row * sideSize + colAux;
 
         if (!board[rightTile]) {
           continue;
         }
 
-        unsigned goalRowLeft = board[leftTile]/ sideSize;
-        unsigned goalRowRight = board[rightTile] / sideSize;
+        int goalRowLeft = board[leftTile]/ sideSize;
+        int goalRowRight = board[rightTile] / sideSize;
 
         if (goalRowLeft != goalRowRight || goalRowLeft != row) {
           continue;
@@ -55,23 +54,23 @@ void calculateHeuristicLCMD(Node& node) {
     }
   }
 
-  for (unsigned row = 0; row < sideSize; ++row) {
-    for (unsigned col = 0; col < sideSize; ++col) {
-      unsigned leftTile = row * sideSize + col;
+  for (int row = 0; row < sideSize; ++row) {
+    for (int col = 0; col < sideSize; ++col) {
+      int leftTile = row * sideSize + col;
 
       if (!board[leftTile]) {
         continue;
       }
 
-      for (unsigned rowAux = row + 1; rowAux < sideSize; ++rowAux) {
-        unsigned belowTile = rowAux * sideSize + col;
+      for (int rowAux = row + 1; rowAux < sideSize; ++rowAux) {
+        int belowTile = rowAux * sideSize + col;
 
         if (!board[belowTile]) {
           continue;
         }
 
-        unsigned goalColAbove = board[leftTile] % sideSize;
-        unsigned goalColBelow = board[belowTile] % sideSize;
+        int goalColAbove = board[leftTile] % sideSize;
+        int goalColBelow = board[belowTile] % sideSize;
 
         if (goalColAbove != goalColBelow || goalColAbove != col) {
           continue;
@@ -84,8 +83,10 @@ void calculateHeuristicLCMD(Node& node) {
     }
   }
 
-  for (unsigned i = 0; i < node.board.size(); ++i) {
-    manhattanDistance += abs(positionToCoord[i][0] - positionToCoord[node.board[i]][0]) + abs(positionToCoord[i][1] - positionToCoord[node.board[i]][1]);
+  for (int i = 0; i < sideSize; ++i) {
+    for (int j = 0; j < sideSize; ++j) {
+      manhattanDistance += abs(i - (node.board[i*sideSize+j] / sideSize)) + abs(j - (node.board[i * sideSize + j] % sideSize));
+    }
   }
 
   node.h_score = linearConflict + manhattanDistance;
@@ -95,11 +96,15 @@ void calculateHeuristicLCMD(Node& node) {
 void calculateHeuristicManhattan(Node& node)
 {
   int manhattanDistance = 0;
-  
-  for (unsigned i = 0; i < node.board.size(); ++i) {
-    manhattanDistance += abs(positionToCoord[i][0] - positionToCoord[node.board[i]][0]) + abs(positionToCoord[i][1] - positionToCoord[node.board[i]][1]);
+
+  int sideSize = sqrt(node.board.size());
+
+  for (int i = 0; i < sideSize; ++i) {
+    for (int j = 0; j < sideSize; ++j) {
+      manhattanDistance += abs(i - (node.board[i * sideSize + j] / sideSize)) + abs(j - (node.board[i * sideSize + j] % sideSize));
+    }
   }
-  
+
   node.h_score = manhattanDistance;
   node.f_score = node.g_score + node.h_score;
 }
@@ -117,26 +122,20 @@ void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList)
   reverse(stepsList.begin(), stepsList.end());
 }
 
-void a_star(const Node& start, const bool printSteps)
+void a_star(Node& start, const bool printSteps)
 {
   priority_queue<Node, vector<Node>> open_list;    // sequencia de estados até a solução final
   vector<Node> closed_list; // estados já visitados
 
   goalState.clear();
-  positionToCoord.clear();
   for (unsigned i = 0; i < start.board.size(); ++i) {
     goalState.push_back(i);
-  }
-
-  for (int i = sqrt(goalState.size())-1; i >= 0; --i) {
-    for (int j = 0; j < sqrt(goalState.size()); ++j) {
-      positionToCoord.push_back({ j, i });
-    }
   }
 
   high_resolution_clock::time_point tpStart = high_resolution_clock::now();
 
   // insere instância incial
+  calculateHeuristicLCMD(start);
   open_list.push(start);
   unsigned iterCount = 0;
   while (!open_list.empty())
@@ -165,7 +164,7 @@ void a_star(const Node& start, const bool printSteps)
           cout << "g: " << nodeAux.g_score << " h: " << nodeAux.h_score << endl << endl;
         }
       }
-      cout << "Passos: " << stepsList.size() - 1 << " Tempo Gasto: " << timeSpent << endl;
+      cout << "Passos: " << stepsList.size() - 1 << " Tempo Gasto: " << timeSpent <<  " Nós avaliados: " << closed_list.size()  <<endl;
 
       break;
     }
@@ -202,10 +201,13 @@ void a_star(const Node& start, const bool printSteps)
   }
 }
 
+int countIters = 0;
+
 int search(vector<Node>& path,double lowerBound) {
   unsigned lastNode = path.size() - 1;
   if (path[lastNode].f_score > lowerBound) return path[lastNode].f_score;
   if (path[lastNode].board == goalState) return -1;
+  countIters++;
   int min = INT32_MAX;
   vector<Node> successorsVec = generateSuccessors(path[lastNode], path.size()-1);
   priority_queue<Node> successors(successorsVec.begin(), successorsVec.end());
@@ -235,21 +237,14 @@ int search(vector<Node>& path,double lowerBound) {
 void ida_star(Node& start, const bool printSteps) {
 
   goalState.clear();
-  positionToCoord.clear();
 
   for (unsigned i = 0; i < start.board.size(); ++i) {
     goalState.push_back(i);
   }
 
-  for (int i = sqrt(goalState.size()) - 1; i >= 0; --i) {
-    for (int j = 0; j < sqrt(goalState.size()); ++j) {
-      positionToCoord.push_back({ j, i });
-    }
-  }
-
   high_resolution_clock::time_point tpStart = high_resolution_clock::now();
 
-  calculateHeuristicManhattan(start);
+  calculateHeuristicLCMD(start);
   double lowerBound = start.h_score;
   vector<Node> path;
   set<Node> auxPath;
@@ -270,10 +265,9 @@ void ida_star(Node& start, const bool printSteps) {
               cout << endl;
           }
           cout << "g: " << nodeAux.g_score << " h:" << nodeAux.h_score << endl << endl;
-          cout << endl << endl;
         }
       }
-      cout << "Passos: " << path.size() - 1 << " Tempo Gasto: " << timeSpent << endl;
+      cout << "Passos: " << path.size() - 1 << " Tempo Gasto: " << timeSpent << " Iteracoes recursivas: " << countIters << endl << endl;
       return;
     }
     if (result == INT32_MAX) return;
@@ -309,7 +303,7 @@ vector<Node> generateSuccessors(const Node parent, const unsigned parentIndex)
 
     // gera um nó, calcula os valores g, h, f
     Node node(newBoard, parent.g_score + 1, 0, 0, parentIndex);
-    calculateHeuristicManhattan(node);
+    calculateHeuristicLCMD(node);
     successors.push_back(node);
   }
 
