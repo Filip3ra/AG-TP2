@@ -21,28 +21,28 @@ bool Node::operator<(const Node& rhs) const{
 
 void calculateHeuristicLCMD(Node& node) {
   vector<int> board = node.board;
-  int sideSize = sqrt(board.size());
+  unsigned sideSize = sqrt(board.size());
 
   int linearConflict = 0;
   int manhattanDistance = 0;
 
   for (unsigned row = 0; row < sideSize; ++row) {
     for (unsigned col = 0; col < sideSize; ++col) {
-      int leftTile = row * sideSize + col;
+      unsigned leftTile = row * sideSize + col;
 
       if (!board[leftTile]) {
         continue;
       }
 
       for (unsigned colAux = col + 1; colAux < sideSize; ++colAux) {
-        int rightTile = row * sideSize + colAux;
+        unsigned rightTile = row * sideSize + colAux;
 
         if (!board[rightTile]) {
           continue;
         }
 
-        int goalRowLeft = board[leftTile]/ sideSize;
-        int goalRowRight = board[rightTile] / sideSize;
+        unsigned goalRowLeft = board[leftTile]/ sideSize;
+        unsigned goalRowRight = board[rightTile] / sideSize;
 
         if (goalRowLeft != goalRowRight || goalRowLeft != row) {
           continue;
@@ -57,21 +57,21 @@ void calculateHeuristicLCMD(Node& node) {
 
   for (unsigned row = 0; row < sideSize; ++row) {
     for (unsigned col = 0; col < sideSize; ++col) {
-      int leftTile = row * sideSize + col;
+      unsigned leftTile = row * sideSize + col;
 
       if (!board[leftTile]) {
         continue;
       }
 
       for (unsigned rowAux = row + 1; rowAux < sideSize; ++rowAux) {
-        int belowTile = rowAux * sideSize + col;
+        unsigned belowTile = rowAux * sideSize + col;
 
         if (!board[belowTile]) {
           continue;
         }
 
-        int goalColAbove = board[leftTile] % sideSize;
-        int goalColBelow = board[belowTile] % sideSize;
+        unsigned goalColAbove = board[leftTile] % sideSize;
+        unsigned goalColBelow = board[belowTile] % sideSize;
 
         if (goalColAbove != goalColBelow || goalColAbove != col) {
           continue;
@@ -97,7 +97,7 @@ void calculateHeuristicManhattan(Node& node)
   int manhattanDistance = 0;
   
   for (unsigned i = 0; i < node.board.size(); ++i) {
-    manhattanDistance += abs(positionToCoord[i][0] - positionToCoord[node.board[i] - 1][0]) + abs(positionToCoord[i][1] - positionToCoord[node.board[i] - 1][1]);
+    manhattanDistance += abs(positionToCoord[i][0] - positionToCoord[node.board[i]][0]) + abs(positionToCoord[i][1] - positionToCoord[node.board[i]][1]);
   }
   
   node.h_score = manhattanDistance;
@@ -117,7 +117,7 @@ void makePath(Node& solved, vector<Node> closed_list, vector<Node>& stepsList)
   reverse(stepsList.begin(), stepsList.end());
 }
 
-void a_star(const Node& start)
+void a_star(const Node& start, const bool printSteps)
 {
   priority_queue<Node, vector<Node>> open_list;    // sequencia de estados até a solução final
   vector<Node> closed_list; // estados já visitados
@@ -152,18 +152,20 @@ void a_star(const Node& start)
       makePath(current, closed_list, stepsList);
       
       // Printa os passos para chegar na solução
-      /*for (auto nodeAux : stepsList) {
-        for (int i = 0; i < nodeAux.board.size(); ++i)
-        {
-          int num = nodeAux.board[i];
-          cout << num << " ";
-          if ((i + 1) % 3 == 0)
-            cout << endl;
+      if(printSteps)
+      {
+        for (auto nodeAux : stepsList) {
+          for (unsigned i = 0; i < nodeAux.board.size(); ++i)
+          {
+            int num = nodeAux.board[i];
+            cout << num << " ";
+            if ((i + 1) % (int)(sqrt(start.board.size())) == 0)
+              cout << endl;
+          }
+          cout << "g: " << nodeAux.g_score << " h: " << nodeAux.h_score << endl << endl;
         }
-        cout << nodeAux.g_score << " " << nodeAux.h_score << " ";
-        cout << endl << endl;
-      }*/
-      cout << stepsList.size()-1 << " " << timeSpent << endl;
+      }
+      cout << "Passos: " << stepsList.size() - 1 << " Tempo Gasto: " << timeSpent << endl;
 
       break;
     }
@@ -229,7 +231,8 @@ int search(vector<Node>& path,double lowerBound) {
   return min;
 }
 
-void ida_star(Node& start) {
+
+void ida_star(Node& start, const bool printSteps) {
 
   goalState.clear();
   positionToCoord.clear();
@@ -246,7 +249,7 @@ void ida_star(Node& start) {
 
   high_resolution_clock::time_point tpStart = high_resolution_clock::now();
 
-  calculateHeuristicLCMD(start);
+  calculateHeuristicManhattan(start);
   double lowerBound = start.h_score;
   vector<Node> path;
   set<Node> auxPath;
@@ -256,18 +259,21 @@ void ida_star(Node& start) {
     if (result == -1) {
       unsigned timeSpent = duration_cast<milliseconds>(high_resolution_clock::now() - tpStart).count();
       // printa o passo a passo da solução
-      for (auto nodeAux : path) {
-        for (unsigned i = 0; i < nodeAux.board.size(); ++i)
-        {
-          int num = nodeAux.board[i];
-          printf("%02d ", num);
-          if ((i + 1) % (int)(sqrt(start.board.size())) == 0)
-            cout << endl;
+      if(printSteps)
+      {
+        for (auto nodeAux : path) {
+          for (unsigned i = 0; i < nodeAux.board.size(); ++i)
+          {
+            int num = nodeAux.board[i];
+            printf("%02d ", num);
+            if ((i + 1) % (int)(sqrt(start.board.size())) == 0)
+              cout << endl;
+          }
+          cout << "g: " << nodeAux.g_score << " h:" << nodeAux.h_score << endl << endl;
+          cout << endl << endl;
         }
-        cout << nodeAux.g_score << " " << nodeAux.h_score << " ";
-        cout << endl << endl;
       }
-      cout << path.size() - 1 << " " << timeSpent << endl;
+      cout << "Passos: " << path.size() - 1 << " Tempo Gasto: " << timeSpent << endl;
       return;
     }
     if (result == INT32_MAX) return;
@@ -303,7 +309,7 @@ vector<Node> generateSuccessors(const Node parent, const unsigned parentIndex)
 
     // gera um nó, calcula os valores g, h, f
     Node node(newBoard, parent.g_score + 1, 0, 0, parentIndex);
-    calculateHeuristicLCMD(node);
+    calculateHeuristicManhattan(node);
     successors.push_back(node);
   }
 

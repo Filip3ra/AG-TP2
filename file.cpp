@@ -5,14 +5,14 @@
 
 using namespace std;
 
-void FileManager::readFile(const string &filename)
+bool FileManager::readFile(const string &filename)
 {
   ifstream file(filename);
 
   if (!file.is_open())
   {
-    cerr << "Erro ao abrir o arquivo!" << endl;
-    return;
+    cerr << "Não foi possível abrir o arquivo passado como parâmetro!" << endl;
+    return false;
   }
 
   string line;
@@ -30,6 +30,8 @@ void FileManager::readFile(const string &filename)
   }
 
   file.close();
+
+  return true;
 }
 
 const vector<vector<int>> &FileManager::getVector() const

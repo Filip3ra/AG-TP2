@@ -8,12 +8,11 @@ using namespace std;
 class FileManager
 {
 public:
-  void readFile(const string &filename);
+  bool readFile(const string &filename);
   const vector<vector<int>> &getVector() const;
 
 private:
   vector<vector<int>> data;
-  vector<int> values;
 };
 
 class Node
@@ -33,7 +32,7 @@ public:
   bool operator<(const Node& rhs) const;
 };
 
-void a_star(const Node &);
+void a_star(const Node &, const bool printSteps);
 vector<Node> generateSuccessors(const Node, const unsigned parentIndex);
 vector<int> getNeighbor(int);
-void ida_star(Node& start);
+void ida_star(Node& start, const bool printSteps);
